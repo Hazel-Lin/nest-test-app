@@ -16,6 +16,12 @@ async function createApp() {
   );
 
   // 配置 Swagger 文档
+  setupSwagger(app);
+
+  return app;
+}
+
+function setupSwagger(app) {
   const config = new DocumentBuilder()
     .setTitle('智能冰箱 API')
     .setDescription('智能冰箱管理系统 API 文档')
@@ -24,8 +30,6 @@ async function createApp() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
-
-  return app;
 }
 
 async function bootstrap() {
@@ -41,4 +45,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Vercel 部署时使用
-export default createApp;
+export default async function handler(req, res) {
+  const app = await createApp();
+  await app.init(); // 确保应用初始化
+  app.getHttpAdapter().getInstance()(req, res); // 将请求交给 Nest.js 处理
+}
