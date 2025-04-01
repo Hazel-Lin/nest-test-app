@@ -2,13 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
-
-const expressApp = express();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+  const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({
@@ -34,10 +30,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api/docs", app, document);
 
-  await app.init(); // 不再使用 listen，而是 init 初始化
+  await app.listen(process.env.PORT || 3000);
 }
 
-// 运行 bootstrap，并导出 handler
 bootstrap();
-
-module.exports = expressApp;
